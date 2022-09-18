@@ -9,11 +9,9 @@ int const BOTTOM = -1;
 
 vector<vector<int>> GRILLA;
 
-int N,M,x1,x2,x3,y1,y2,y3;
+int N,M,X1,X2,X3,Y1,Y2,Y3;
 
-
-
-void initialize_grid(const int n, const int m, const int x1, const int y1, const int x2, const int y2, const int x3, const int y3) {
+void initialize_grid(const int &n, const int &m, const int &x1, const int &y1, const int &x2, const int &y2, const int &x3, const int &y3) {
     vector<int> row(m, BOTTOM);
     GRILLA = vector<vector<int>>(n, row);
     GRILLA[0][0] = 1; // Start
@@ -23,64 +21,61 @@ void initialize_grid(const int n, const int m, const int x1, const int y1, const
     GRILLA[0][1] = n*m; // End
 }
 
-pair<vector<pos>, bool> adyacentes_posibles(int x, int y) {
-    vector<pos> posibles;
+void calcular_adyacentes_posibles(int const &x, int const &y, vector<pos> &v, bool &c) {
     int value = GRILLA[x][y];
-    bool checkpoint_al_lado = false;
     if (x > 0) {
-        if (GRILLA[x - 1][y] == BOTTOM) {
-            posibles.push_back(make_pair(x - 1, y));
+        if (GRILLA[x - 1][y] == BOTTOM || GRILLA[x - 1][y] > value + 1) {
+            v.emplace_back(x - 1, y);
         } else if (GRILLA[x - 1][y] > value) {
-            checkpoint_al_lado = true;
+            c = true;
         }
     }
     if (x < (N - 1)) {
-        if (GRILLA[x + 1][y] == BOTTOM) {
-            posibles.push_back(make_pair(x + 1, y));
+        if (GRILLA[x + 1][y] == BOTTOM || GRILLA[x + 1][y] > value + 1) {
+            v.emplace_back(x + 1, y);
         }
         else if (GRILLA[x + 1][y] > value) {
-            checkpoint_al_lado = true;
+            c = true;
         }
     }
     if (y > 0) {
-        if (GRILLA[x][y - 1] == BOTTOM) {
-            posibles.push_back(make_pair(x, y - 1));
+        if (GRILLA[x][y - 1] == BOTTOM || GRILLA[x][y - 1] > value + 1) {
+            v.emplace_back(x, y - 1);
         } else if (GRILLA[x][y - 1] > value) {
-            checkpoint_al_lado = true;
+            c = true;
         }
     }
     if (y < (M - 1)) {
-        if (GRILLA[x][y + 1] == BOTTOM) {
-            posibles.push_back(make_pair(x, y + 1));
+        if (GRILLA[x][y + 1] == BOTTOM || GRILLA[x][y + 1] > value + 1) {
+            v.emplace_back(x, y + 1);
         } else if (GRILLA[x][y + 1] > value) {
-            checkpoint_al_lado = true;
+            c = true;
         }
     }
-    return make_pair(posibles, checkpoint_al_lado);
 }
 
-bool t_bone(pair<vector<pos>, bool> &s) {
-    vector<pos> adyacentes = s.first;
-    bool checkpoint_al_lado = s.second;
-    if (adyacentes.size() == 2) {
-        if ((adyacentes[0].first == adyacentes[1].first || adyacentes[0].second == adyacentes[1].second) && not checkpoint_al_lado) {
+bool t_bone(vector<pos> &s) {
+    if (s.size() == 2) {
+        if (s[0].first == s[1].first || s[0].second == s[1].second) {
             return true;
+//        } else if () {
+//
         }
     }
     return false;
 }
 
-pos next_target(int value) {
+pos next_target(int const &value) {
     int target_x, target_y;
     if (value < N*M/4) {
-        target_x = x1;
-        target_y = y1;
+        target_x = X1;
+        target_y = Y1;
     } else if (value < N*M/2) {
-        target_x = x2;
-        target_y = y2;
+        target_x = X2;
+        target_y = Y2;
     } else if (value < 3*N*M/4) {
-        target_x = x3;
-        target_y = y3;
+        target_x = X3;
+        target_y = Y3;
     } else {
         target_x = 0;
         target_y = 1;
@@ -88,7 +83,7 @@ pos next_target(int value) {
     return make_pair(target_x, target_y);
 }
 
-int solver(int x, int y) {
+int solver(int const &x, int const &y) {
 
     int i = GRILLA[x][y];
 
@@ -100,10 +95,7 @@ int solver(int x, int y) {
     }
     // Finishing condition
 
-    // Siguiente target
     pos target = next_target(i);
-    // Siguiente target
-
      // Poda Manhattan
     int manhattan_distance = abs(x - target.first) + abs(y - target.second);
     if (manhattan_distance > GRILLA[target.first][target.second] - i) {
@@ -111,23 +103,17 @@ int solver(int x, int y) {
     }
     // Poda Manhattan
 
+    vector<pos> vecinos;
+    bool checkpoint_al_lado = false;
+    calcular_adyacentes_posibles(x,y, vecinos, checkpoint_al_lado);
 
     // Poda loops
-    pair<vector<pos>, bool> surroundings = adyacentes_posibles(x,y);
-    if (t_bone(surroundings) and not surroundings.second) {
+    if (not checkpoint_al_lado && t_bone(vecinos)) {
         return 0;
     }
     // Poda loops
 
     int res = 0;
-
-//    for (pos ady : surroundings.first) {
-//        pair<vector<pos>, bool> s = adyacentes_posibles(ady.first, ady.second);
-//        if ((s.first.size() + s.second) == 1) {
-//            GRILLA[ady.first][ady.second] = i + 1;
-//            return solver(ady.first, ady.second);
-//        }
-//    }
 
     // Checkpoint/target
     if (i == GRILLA[target.first][target.second] - 1) {
@@ -136,10 +122,12 @@ int solver(int x, int y) {
     // Checkpoint
 
     // Backtracking
-    for (pos ady : surroundings.first) {
-        GRILLA[ady.first][ady.second] = i + 1;
-        res += solver(ady.first, ady.second);
-        GRILLA[ady.first][ady.second] = BOTTOM;
+    for (pos ady : vecinos) {
+        if (GRILLA[ady.first][ady.second] == BOTTOM) {
+            GRILLA[ady.first][ady.second] = i + 1;
+            res += solver(ady.first, ady.second);
+            GRILLA[ady.first][ady.second] = BOTTOM;
+        }
     }
     return res;
     // Backtracking
@@ -153,8 +141,8 @@ int main() {
     int test_case = 1;
     vector<int> res;
     while(scanf("%d %d",&N,&M),(N != 0 && M != 0)) {
-        scanf("%d %d %d %d %d %d", &x1, &y1, &x2, &y2, &x3, &y3);
-        initialize_grid(N,M,x1,y1,x2,y2,x3,y3);
+        scanf("%d %d %d %d %d %d", &X1, &Y1, &X2, &Y2, &X3, &Y3);
+        initialize_grid(N,M,X1,Y1,X2,Y2,X3,Y3);
         int res_i = solver(0,0);
         res.push_back(res_i);
         test_case++;
