@@ -142,15 +142,15 @@ int main() {
 //    clock_t tStart = clock();
     int test_case = 0;
     vector<int> res;
-    while(scanf("%d %d", &N, &M), (N != 0 && M != 0)) {
-        scanf("%d %d %d %d %d %d", &X1, &Y1, &X2, &Y2, &X3, &Y3);
+    while(cin >> N >> M, (N != 0 && M != 0)) {
+        cin >> X1 >> Y1 >> X2 >> Y2 >> X3 >> Y3;
         initializeGrid(N, M, X1, Y1, X2, Y2, X3, Y3);
         int res_i = solve(0, 0);
         res.push_back(res_i);
         test_case++;
     }
     for (int i = 0; i < test_case; i++) {
-        printf("Case %d: %d\n", i + 1, res[i]);
+        cout << "Case " << i + 1 << ": " <<  res[i] << endl;
     }
 
 //    cout << endl;
