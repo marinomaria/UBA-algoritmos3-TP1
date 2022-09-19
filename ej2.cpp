@@ -18,7 +18,7 @@ double distance(double x1, double y1, double x2, double y2){
 }
 
 
-double greedySolve(int &n, double &l, double &w, vector<sprinkle> s){
+int greedySolve(int &n, double &l, double &w, vector<sprinkle> s){
     double maxWidth = 0;
     int res = 0;
     int lastSprinkleUsed = -1;
@@ -31,17 +31,19 @@ double greedySolve(int &n, double &l, double &w, vector<sprinkle> s){
                 dry = false;
             }
         }
-        maxWidth = pitagoras(s[rightmostSprinkle].second, w / 2) + s[rightmostSprinkle].first;
-        lastSprinkleUsed = rightmostSprinkle;
-        res++;
+        if (rightmostSprinkle > lastSprinkleUsed) {
+            maxWidth = pitagoras(s[rightmostSprinkle].second, w / 2) + s[rightmostSprinkle].first;
+            lastSprinkleUsed = rightmostSprinkle;
+            res++;
+        } else {
+            return -1;
+        }
     }
     return maxWidth >= l ? res : -1;
 }
 
 int main()
 {
-    int test_case = 0;
-    vector<double> res;
     while(cin >> N >> L >> W) {
         vector<sprinkle> sprinkles(N, make_pair(0,0));
         for (int i = 0; i < N; i++) {
@@ -54,12 +56,7 @@ int main()
         sort(sprinkles.begin(), sprinkles.end(), [](const sprinkle &left, const sprinkle &right) {
             return left.first < right.first;
         });
-        res.push_back(greedySolve(N, L, W, sprinkles));
-        test_case++;
-    }
-
-    for (int i = 0; i < test_case; i++) {
-        cout << res[i] << endl;
+        cout << greedySolve(N, L, W, sprinkles) << endl;
     }
 
     return 0;
