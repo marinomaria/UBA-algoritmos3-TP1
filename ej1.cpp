@@ -150,10 +150,7 @@ int main() {
         test_case++;
     }
     for (int i = 0; i < test_case; i++) {
-        printf("Case %d: %d", i + 1, res[i]);
-        if (i != test_case - 1) {
-            printf("\n");
-        }
+        printf("Case %d: %d\n", i + 1, res[i]);
     }
 
 //    cout << endl;
