@@ -7,56 +7,59 @@ using namespace std;
 
 int N;
 double L, W;
-using sprinkle = pair<int, int>;
+using sprinkler = pair<double, double>;
 
-double distance(double x1, double y1, double x2, double y2){
-    return sqrt(pow(x2 - x1, 2) + pow(y2 - y1, 2));
-}
-
-    double pitagoras(double hypotenuse, double leg){
+double pitagoras(double hypotenuse, double leg){
     return sqrt(pow(hypotenuse, 2) - pow(leg, 2));
 }
 
+sprinkler sprinklerScope(double &c, double &r, double &w) {
+    double d = pitagoras(r, w/2);
+    return make_pair(c - d, c + d);
+}
 
-int greedySolve(int &n, double &l, double &w, vector<sprinkle> s){
-    double maxWidth = 0;
+
+int greedySolve(int &n, double &l, double &w, vector<sprinkler> s){
+    double maxLengthCovered = 0;
     int res = 0;
     int lastSprinkleUsed = -1;
-    while(maxWidth < l) {
+    while (maxLengthCovered < l) {
         int rightmostSprinkle = n - 1;
-        bool dry = distance(maxWidth, w / 2, s[rightmostSprinkle].first, 0) > s[rightmostSprinkle].second;
-        while(dry && rightmostSprinkle > lastSprinkleUsed){
+        while (s[rightmostSprinkle].first > maxLengthCovered && rightmostSprinkle > lastSprinkleUsed) {
             rightmostSprinkle--;
-            if (distance(maxWidth, w / 2, s[rightmostSprinkle].first, 0) <= s[rightmostSprinkle].second) {
-                dry = false;
-            }
         }
         if (rightmostSprinkle > lastSprinkleUsed) {
-            maxWidth = pitagoras(s[rightmostSprinkle].second, w / 2) + s[rightmostSprinkle].first;
+            maxLengthCovered = s[rightmostSprinkle].second;
             lastSprinkleUsed = rightmostSprinkle;
             res++;
         } else {
             return -1;
         }
     }
-    return maxWidth >= l ? res : -1;
+    return res;
 }
 
 int main()
 {
     while(cin >> N >> L >> W) {
-        vector<sprinkle> sprinkles(N, make_pair(0,0));
+        vector<sprinkler> sprinklers(N, make_pair(0,0));
         for (int i = 0; i < N; i++) {
-            int pos;
-            int radius;
-            cin >> pos >> radius;
-            sprinkles[i] = make_pair(pos,radius);
+            double center;
+            double radius;
+            cin >> center >> radius;
+            // If the inputted radius is valid (i.e. greater or equal than
+            // half the width of the strip of grass) calculate its scope
+            if (radius >= W/2) {
+                sprinklers[i] = sprinklerScope(center, radius, W);
+            }
         }
-        // Sort sprinkles vector in ascending order by position
-        sort(sprinkles.begin(), sprinkles.end(), [](const sprinkle &left, const sprinkle &right) {
-            return left.first < right.first;
+        // Sort sprinklers vector in ascending order by scope
+        sort(sprinklers.begin(), sprinklers.end(), [](const sprinkler &left, const sprinkler &right) {
+            return left.second < right.second;
         });
-        cout << greedySolve(N, L, W, sprinkles) << endl;
+
+
+        cout << greedySolve(N, L, W, sprinklers) << endl;
     }
 
     return 0;
