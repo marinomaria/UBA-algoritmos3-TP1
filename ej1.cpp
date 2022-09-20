@@ -15,10 +15,10 @@ void initializeGrid(const int &n, const int &m, const int &x1, const int &y1, co
     vector<int> row(m, BOTTOM);
     GRID = vector<vector<int>>(n, row);
     GRID[0][0] = 1;                 // Start
+    GRID[0][1] = n*m;               // End
     GRID[x1][y1] = int(n*m/4);      // 1st checkpoint
     GRID[x2][y2] = int(n*m/2);      // 2nd checkpoint
     GRID[x3][y3] = int(3*n*m/4);    // 3rd checkpoint
-    GRID[0][1] = n*m;               // End
 }
 
 void getNeighborhood(int const &x, int const &y, vector<pos> &v, bool &c) {
@@ -139,22 +139,20 @@ int solve(int const &x, int const &y) {
 
 int main() {
 
-//    clock_t tStart = clock();
-    int test_case = 0;
-    vector<int> res;
-    while(cin >> N >> M, (N != 0 && M != 0)) {
-        cin >> X1 >> Y1 >> X2 >> Y2 >> X3 >> Y3;
+    int test_case = 1;
+    while(scanf("%d %d", &N, &M), (N != 0 && M != 0)) {
+        scanf("%d %d %d %d %d %d", &X1, &Y1, &X2, &Y2, &X3, &Y3);
         initializeGrid(N, M, X1, Y1, X2, Y2, X3, Y3);
-        int res_i = solve(0, 0);
-        res.push_back(res_i);
-        test_case++;
-    }
-    for (int i = 0; i < test_case; i++) {
-        cout << "Case " << i + 1 << ": " <<  res[i] << endl;
-    }
 
-//    cout << endl;
-//    cout << (clock() - tStart)/CLOCKS_PER_SEC << endl;
+        // If there are checkpoints in the start and end boxes of the GRID return 0, else solve
+        int res = 0;
+        if (GRID[0][0] == 1 && GRID[0][1] == N*M) {
+            res = solve(0, 0);
+        }
+
+        printf("Case %d: %d\n", test_case++, res);
+
+    }
 
     return 0;
 }
