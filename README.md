@@ -12,3 +12,5 @@
 
     g++ ej2.cpp -o ejercicio2
     ./ejercicio2
+
+Adicionalmente se incluye un archivo CMake `CMakeLists.txt` por si llegara a ser de utilidad.
