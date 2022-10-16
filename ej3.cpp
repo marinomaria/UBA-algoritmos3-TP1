@@ -6,11 +6,12 @@
 using namespace std;
 
 #define BOTTOM (-1)
+#define INF numeric_limits<int>::max()
 
 int N;
 double L, W;
-vector<float> MEM_VECTOR;
-using sprinkler = tuple<double, double, float>;
+vector<int> MEM_VECTOR;
+using sprinkler = tuple<double, double, int>;
 
 
 double pitagoras(double hypotenuse, double leg){
@@ -22,7 +23,7 @@ sprinkler sprinklerScope(double &c, double &r, double &w, int &p) {
     return make_tuple(c - d, c + d, p);
 }
 
-float BTSolve(const int &i, vector<sprinkler> &s) {
+int BTSolve(const int &i, vector<sprinkler> &s) {
     if (MEM_VECTOR[i] == BOTTOM) {
 
         // Define the target point to cover.
@@ -43,10 +44,10 @@ float BTSolve(const int &i, vector<sprinkler> &s) {
             }
         }
 
-        vector<float> resVec;
+        vector<int> resVec;
 
         for (int &c: candidates) {
-            float r;
+            int r;
             if (get<1>(s[c]) >= L) {
                 // If the candidate sprinkler covers the full length of the grass left
                 // then the cost of picking it would be its associated cost
@@ -54,7 +55,7 @@ float BTSolve(const int &i, vector<sprinkler> &s) {
             } else if (K.empty()) {
                 // If the sprinkler doesn't cover the full length and we don't have
                 // more sprinklers to the right, there's no solution when choosing this one
-                r = INFINITY;
+                r = INF;
             } else {
                 // Otherwise, the cost of picking this sprinkler is its associated cost +
                 // the cost of covering the strip that's left on the right of its scope
@@ -66,7 +67,7 @@ float BTSolve(const int &i, vector<sprinkler> &s) {
         if (!resVec.empty()) {
             MEM_VECTOR[i] = *min_element(resVec.begin(), resVec.end());
         } else {
-            MEM_VECTOR[i] = INFINITY;
+            MEM_VECTOR[i] = INF;
         }
     }
     return MEM_VECTOR[i];
@@ -93,11 +94,11 @@ int main()
             return get<0>(left) < get<0>(right);
         });
 
-        MEM_VECTOR = vector<float>(N + 1, BOTTOM);
+        MEM_VECTOR = vector<int>(N + 1, BOTTOM);
 
-        float res = BTSolve(N, sprinklers);
+        int res = BTSolve(N, sprinklers);
 
-        cout <<  ((res != INFINITY) ? res : -1)  << endl;
+        cout <<  ((res < INF) ? res : -1)  << endl;
     }
 
     return 0;
