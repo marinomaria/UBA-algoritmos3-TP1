@@ -5,10 +5,11 @@
 
 using namespace std;
 
+#define BOTTOM (-1)
+
 int N;
 double L, W;
 vector<float> MEM_VECTOR;
-const int BOTTOM = -1;
 using sprinkler = tuple<double, double, float>;
 
 
@@ -23,40 +24,49 @@ sprinkler sprinklerScope(double &c, double &r, double &w, int &p) {
 
 float BTSolve(const int &i, vector<sprinkler> &s) {
     if (MEM_VECTOR[i] == BOTTOM) {
+
+        // Define the target point to cover.
+        // If this is the first call (i == N), x0 = 0.
+        // Otherwise set x0 to the right border of the i-th sprinkler
         double x0 = i == N ? 0 : get<1>(s[i]);
 
         vector<int> candidates;
         vector<int> K;
+        // Iterate over the sprinklers vector
         for (int c = 0; c < s.size(); c++) {
             if (get<0>(s[c]) < x0 && get<1>(s[c]) > x0) {
+                // c is a candidate <=> x0 it's within its scope
                 candidates.push_back(c);
-            } else {
+            } else if (get<0>(s[c]) > x0) {
+                // c is in K <=> it isn't a candidate and its scope begins on the right of x0
                 K.push_back(c);
             }
         }
 
-        if (candidates.empty()) {
-            MEM_VECTOR[i] = INFINITY;
-        } else {
-            vector<int> resVec;
+        vector<float> resVec;
 
-            for (int &c: candidates) {
-                int r;
-                if (get<1>(s[c]) >= L) {
-                    r = get<2>(s[c]);
-                } else if (K.empty()) {
-                    r = INFINITY;
-                } else {
-                    r = get<2>(s[c]) + BTSolve(c, s);
-                }
-                resVec.push_back(r);
-            }
-
-            if (!resVec.empty()) {
-                MEM_VECTOR[i] = *min_element(resVec.begin(), resVec.end());
+        for (int &c: candidates) {
+            float r;
+            if (get<1>(s[c]) >= L) {
+                // If the candidate sprinkler covers the full length of the grass left
+                // then the cost of picking it would be its associated cost
+                r = get<2>(s[c]);
+            } else if (K.empty()) {
+                // If the sprinkler doesn't cover the full length and we don't have
+                // more sprinklers to the right, there's no solution when choosing this one
+                r = INFINITY;
             } else {
-                MEM_VECTOR[i] = INFINITY;
+                // Otherwise, the cost of picking this sprinkler is its associated cost +
+                // the cost of covering the strip that's left on the right of its scope
+                r = get<2>(s[c]) + BTSolve(c, s);
             }
+            resVec.push_back(r);
+        }
+
+        if (!resVec.empty()) {
+            MEM_VECTOR[i] = *min_element(resVec.begin(), resVec.end());
+        } else {
+            MEM_VECTOR[i] = INFINITY;
         }
     }
     return MEM_VECTOR[i];
@@ -83,7 +93,7 @@ int main()
             return get<0>(left) < get<0>(right);
         });
 
-        MEM_VECTOR = vector<float>(sprinklers.size() + 1, BOTTOM);
+        MEM_VECTOR = vector<float>(N + 1, BOTTOM);
 
         float res = BTSolve(N, sprinklers);
 
